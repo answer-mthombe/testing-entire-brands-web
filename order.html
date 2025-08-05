@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Place Order | Entire Brands</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"> 
+
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Glacial+Indifference&family=Great+Vibes&display=swap" rel="stylesheet">
+
+     <!-- Firebase Core -->
+<!-- Firebase Core -->
+<script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
+<!-- Firebase Services -->
+<script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-auth-compat.js"></script>
+
+
+<!-- Your custom JS file -->
+<script src="firebase-orders.js"></script>
+<!-- Your Custom Firebase Logic -->
+     
+
+    <style>
+    /* Enhanced Service Card Styles */
+    .service-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        height: 100%;
+        background: white;
+        margin: 0 auto; /* Center the cards */
+        max-width: 200px; /* Limit card width */
+    }
+    
+    .service-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+    
+    .service-card.selected-service {
+        border: 3px solid #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+    }
+    
+    .service-image {
+        height: 150px;
+        object-fit: cover;
+        width: 100%;
+        transition: transform 0.5s ease;
+    }
+    
+    .service-card:hover .service-image {
+        transform: scale(1.05);
+    }
+    
+    /* Center the service cards container */
+    .row.g-4.mb-5 {
+        justify-content: center;
+    }
+    
+    /* Service Preview Gallery */
+    .service-preview {
+        position: relative;
+        height: 400px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        background: #f8f9fa;
+        display: none;
+    }
+    
+    .preview-slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: flex-end;
+    }
+    
+    .preview-slide.active {
+        opacity: 1;
+    }
+    
+    .slide-content {
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+        padding: 20px;
+        width: 100%;
+        color: white;
+    }
+    
+    /* Preview Navigation Dots */
+    .preview-nav {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .preview-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .preview-dot.active {
+        background: #0d6efd;
+        transform: scale(1.3);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .service-preview {
+            height: 300px;
+        }
+        
+        .service-image {
+            height: 120px;
+        }
+        
+        /* Center cards on mobile */
+        .col-md-4.col-lg-2.wow.fadeIn {
+            display: flex;
+            justify-content: center;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar & Hero Start -->
+    <div class="container-fluid position-relative p-0">
+        <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
+            <a href="" class="navbar-brand p-0 d-flex align-items-center">
+                <img src="img/logo2.png" alt="Logo Icon" style="height: 220px; width: auto; margin-right: 15px;" />
+                <h1 class="text-primary m-0">Entire Brands</h1>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="fa fa-bars"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto py-0">
+                    <a href="index.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About</a>
+                    <a href="service.html" class="nav-item nav-link">Service</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact</a>
+                </div>
+                <div class="d-none d-xl-flex me-3">
+                    <div class="d-flex flex-column pe-3 border-end border-primary">
+                        <span class="text-body">Get Free Delivery</span>
+                        <a href="tel:+4733378901"><span class="text-primary">(+27) 81 549 0183</span></a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Header Start -->
+        <div class="container-fluid bg-breadcrumb">
+            <div class="container text-center py-5" style="max-width: 900px;">
+                <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Ready to Elevate Your Brand?</h4>
+                <ol class="breadcrumb d-flex justify-content-center mb-0 wow fadeInDown" data-wow-delay="0.3s">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item active text-primary">Place Order</li>
+                </ol>    
+            </div>
+        </div>
+        <!-- Header End -->
+    </div>
+    <!-- Navbar & Hero End -->
+
+    <!-- Modal Search Start -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content rounded-0">
+                <div class="modal-header">
+                    <h4 class="modal-title mb-0" id="exampleModalLabel">Search by keyword</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex align-items-center">
+                    <div class="input-group w-75 mx-auto d-flex">
+                        <input type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
+                        <span id="search-icon-1" class="input-group-text btn border p-3"><i class="fa fa-search text-white"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Search End -->
+
+    <!-- Order Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="text-center mx-auto pb-5 wow fadeIn" data-wow-delay="0.1s" style="max-width: 800px;">
+                <h1 class="display-5 text-primary mb-4">Place Your Order</h1>
+                <p class="mb-4">Select your service below to view examples and complete the order form.</p>
+            </div>
+
+            <!-- Service Preview Gallery -->
+            <div id="servicePreviews">
+                <!-- Previews will be injected here by JavaScript -->
+            </div>
+
+            <!-- Service Selection -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-4 col-lg-2 wow fadeIn" data-wow-delay="0.1s">
+                    <div class="service-card text-center p-3 h-100" onclick="selectService('corporate-gifts')" data-service="corporate-gifts">
+                        <img src="img/branding2.jpeg" class="service-image w-100" alt="Corporate Gifts">
+                        <h6 class="mb-0 mt-3">Design And Graphics</h6>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-2 wow fadeIn" data-wow-delay="0.2s">
+                    <div class="service-card text-center p-3 h-100" onclick="selectService('signage')" data-service="signage">
+                        <img src="img/branding6.jpeg" class="service-image w-100" alt="Signage">
+                        <h6 class="mb-0 mt-3">Promotional Branding</h6>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-2 wow fadeIn" data-wow-delay="0.3s">
+                    <div class="service-card text-center p-3 h-100" onclick="selectService('branding')" data-service="branding">
+                        <img src="img/gift1.jpeg" class="service-image w-100" alt="Branding">
+                        <h6 class="mb-0 mt-3">Gifting</h6>
+                    </div>
+                </div>
+                <div class="col-md-4 col-lg-2 wow fadeIn" data-wow-delay="0.4s">
+                    <div class="service-card text-center p-3 h-100" onclick="selectService('marketing')" data-service="marketing">
+                        <img src="img/events.jpg" class="service-image w-100" alt="Marketing">
+                        <h6 class="mb-0 mt-3">Events</h6>
+                    </div>
+                </div>
+                
+                
+            </div>
+
+            <!-- Order Form -->
+            <div id="orderForm" class="row g-5 wow fadeIn" data-wow-delay="0.1s">
+                <div class="col-lg-6">
+                    <form method="POST" enctype="multipart/form-data" id="orderFormFirebase">
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                                    <label for="name">Your Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="company" name="company" placeholder="Company Name">
+                                    <label for="company">Company Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
+                                    <label for="email">Your Email</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number" required>
+                                    <label for="phone">Phone Number</label>
+                                </div>
+                            </div>
+                             <select id="selectedService" name="selectedService" class="form-select">
+                                  <option value="">Select Service</option>
+                                  <option value="Design And Graphics">Design And Graphics</option>
+                                  <option value="Promotional Branding">Promotional Branding</option>
+                                  <option value="Gifting">Gifting</option>
+                                  <option value="Events">Events</option>
+                            </select>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Project Details" id="details" name="details" style="height: 150px" required></textarea>
+                                    <label for="details">Project Details & Requirements</label>
+                                </div>
+                            </div>
+                           
+
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="fileUpload" class="form-label">Upload Reference Files (Optional)</label>
+                                    <input class="form-control" type="file" id="fileUpload" name="fileUpload" multiple>
+                                    <div class="form-text">Max file size: 10MB. Supported formats: JPG, PNG, PDF, AI</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">terms and conditions</a>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 text-center">
+                                 <button class="btn btn-primary rounded-pill py-3 px-5" type="submit">Submit Order</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-6">
+                    <div class="bg-light p-4 rounded h-100">
+                        <h4 class="mb-4">Why Choose Entire Brands?</h4>
+                        <ul class="list-unstyled">
+                            <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> B-BBEE Level 1 Contributor</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Custom solutions since 2016</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Trusted by top clients like Philip Morris, Old Mutual</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> Creative, flexible, and professional service</li>
+                            <li class="mb-3"><i class="fas fa-check-circle text-primary me-2"></i> On-time delivery guaranteed</li>
+                        </ul>
+                        <hr>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fa-2x text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-0">Need immediate assistance?</h6>
+                                <p class="mb-0">Call us at <a href="tel:+27815490183">(+27) 81 549 0183</a> or email <a href="mailto:slondiwe.motshabi@entirebrands.co.za">slondiwe.motshabi@entirebrands.co.za</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Order End -->
+
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Order Process</h6>
+                    <p>By submitting this order form, you agree to our terms of service. Our team will review your requirements and contact you within 24 hours to confirm details and provide a quote.</p>
+                    
+                    <h6 class="mt-4">Lead Times</h6>
+                    <p>Production and delivery times vary based on the complexity and quantity of your order. Standard lead times are 7-14 business days but may be longer for custom projects.</p>
+                    
+                    <h6 class="mt-4">Payment Terms</h6>
+                    <p>A 50% deposit is required to commence work, with the balance due upon completion before delivery. We accept EFT and credit card payments.</p>
+                    
+                    <h6 class="mt-4">Cancellation Policy</h6>
+                    <p>Orders may be cancelled within 24 hours of confirmation. After production begins, cancellations may incur fees for work completed.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Start -->
+    <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.2s">
+        <div class="container py-5">
+            <div class="row g-5 mb-5 align-items-center">
+                <div class="col-lg-7">
+                    <div class="position-relative mx-auto">
+                        <input class="form-control rounded-pill w-100 py-3 ps-4 pe-5" type="text" placeholder="Email address to Subscribe">
+                        <button type="button" class="btn btn-secondary rounded-pill position-absolute top-0 end-0 py-2 px-4 mt-2 me-2">Subscribe</button>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                        <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-secondary btn-md-square rounded-circle me-3" href=""><i class="fab fa-instagram"></i></a>
+                        <a class="btn btn-secondary btn-md-square rounded-circle me-0" href=""><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <div class="footer-item">
+                            <a href="#" class="navbar-brand p-0 d-flex align-items-center" style="margin-left: -25px; margin-top: -28px;">
+                                <img src="img/logo2.png" alt="Logo Icon" style="height: 80px; width: auto; margin-right: -15px;" />
+                                <h3 class="text-white m-0" style="margin-top: 5px;">Entire Brands</h3>
+                            </a>
+                            <p class="mb-3 mt-3">
+                                Entire Brands delivers creative branding and gifting solutions that help businesses stand out and connect through impactful design, signage, and events.
+                            </p>
+                        </div>
+                        <div class="position-relative">
+                            <input class="form-control rounded-pill w-100 py-3 ps-4 pe-5" type="text" placeholder="Enter your email">
+                            <button type="button" class="btn btn-secondary rounded-pill position-absolute top-0 end-0 py-2 mt-2 me-2">SignUp</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <h4 class="text-white mb-4">About Us</h4>
+                        <a href="#about"><i class="fas fa-angle-right me-2"></i> Why Choose Us</a>
+                        <a href="contact.html">
+                            <i class="fas fa-angle-right me-2"></i> Contact us
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <h4 class="text-white mb-4">Business Hours</h4>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-0">Mon - Friday:</h6>
+                            <p class="text-white mb-0">09.00 am to 07.00 pm</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-0">Saturday:</h6>
+                            <p class="text-white mb-0">10.00 am to 05.00 pm</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-0">Vacation:</h6>
+                            <p class="text-white mb-0">All Sunday is our vacation</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6 col-xl-3">
+                    <div class="footer-item d-flex flex-column">
+                        <h4 class="text-white mb-4">Contact Info</h4>
+                        <a href="#" title="Boksburg, Freeway Park, Saron Road, Gauteng, 1459">
+                            <i class="fa fa-map-marker-alt me-2"></i> Boksburg
+                        </a>
+                        <a href="#" title="5th Floor, 303 Anton Lamede Street, Durban Club Pl, Durban, KZN, 4001">
+                            <i class="fa fa-map-marker-alt me-2"></i> Durban
+                        </a>
+                        <a href="#" title="Building B, Regus - Pietermaritzburg, Bird Sanctuary, Town Bush Rd, Town Hill, Pietermaritzburg, 3201">
+                            <i class="fa fa-map-marker-alt me-2"></i> Pietermaritzburg
+                        </a>
+                        <a href="mailto:Create@entirebrands.co.za">
+                            <i class="fas fa-envelope me-2"></i> Create@entirebrands.co.za
+                        </a>
+                        <a href="tel:+27815490183">
+                            <i class="fas fa-phone me-2"></i> (+27) 81 549 0183
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+    
+    <!-- Copyright Start -->
+    <div class="container-fluid copyright py-4">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-md-0">
+                    <span class="text-body"><a href="#" class="border-bottom text-white"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                </div>
+                <div class="col-md-6 text-center text-md-end text-body">
+                    Designed By <a class="border-bottom text-white" href="https://htmlcodex.com">HTML Codex</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-secondary btn-lg-square rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>   
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+   
+    
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
+    <script>
+        // Service data with images and descriptions
+        const services = {
+            'corporate-gifts': {
+                name: 'Design And Graphics',
+                slides: [
+                    {
+                        image: 'img/branding3.jpeg',
+                        title: 'Design And Graphics',
+                        description: 'High quality customized branding solutions including signage, packaging, and personalized corporate gifts. We create sentimental art and customized solutions for customer satisfaction.'
+                    },
+                    {
+                        image: 'img/homepage1.jpg',
+                        title: 'Design And Graphics',
+                    },
+                    
+                ]
+            },
+            'signage': {
+                name: 'Promotional Branding',
+                slides: [
+                    {
+                        image: 'img/branding1.jpeg',
+                         title: 'Branding',
+                    },
+                    {
+                        image: 'img/branding2.jpeg',
+                         title: 'Branding',
+                    },
+                    {
+                        image: 'img/branding3.jpeg',
+                        title: 'Branding',
+                    },
+                    {
+                        image: 'img/branding4.jpeg',
+                         title: 'Branding',
+                    },
+                    {
+                        image: 'img/branding5.jpeg',
+                        title: 'Branding',
+                    },
+                    {
+                        image: 'img/branding6.jpeg',
+                        title: 'Branding',
+                    }
+
+                ]
+            },
+            'branding': {
+                name: 'Gifting',
+                slides: [
+                    {
+                        image: 'img/gift1.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift2.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift3.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift4.jpeg',
+                       title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift5.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift6.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift7.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift8.jpeg',
+                        title: 'Gifting',
+                    },
+                    {
+                        image: 'img/gift9.jpeg',
+                        title: 'Gifting',
+                    }
+
+                ]
+            },
+            
+            'events': {
+                name: 'Events',
+                slides: [
+                    {
+                        image: 'img/gift6.jpeg',
+                        title: 'Events',
+                    },
+                    {
+                        image: 'img/gift1.jpeg',
+                        title: 'Events',
+                    },
+                    
+                ]
+            }
+            
+        };
+
+        let currentService = null;
+        let currentSlideIndex = 0;
+        let slideInterval = null;
+
+        function selectService(serviceId) {
+            // Clear any existing interval
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+
+            // Update selected card
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.classList.remove('selected-service');
+            });
+            event.currentTarget.classList.add('selected-service');
+
+            // Set current service
+            currentService = serviceId;
+            currentSlideIndex = 0;
+
+            // Update gallery
+            updateGallery();
+
+            // Start auto-rotation
+            slideInterval = setInterval(nextSlide, 5000);
+
+            // Show the order form
+            document.getElementById('selectedService').value = serviceId;
+            document.getElementById('orderForm').style.display = 'flex';
+            
+            // Scroll to the form
+            document.getElementById('orderForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateGallery() {
+            const previewsContainer = document.getElementById('servicePreviews');
+            const service = services[currentService];
+            
+            previewsContainer.innerHTML = '';
+            
+            // Create preview container
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'service-preview wow fadeIn';
+            previewContainer.style.display = 'block';
+            
+            // Add slides
+            service.slides.forEach((slide, index) => {
+                const slideElement = document.createElement('div');
+                slideElement.className = `preview-slide ${index === 0 ? 'active' : ''}`;
+                slideElement.style.backgroundImage = `url('${slide.image}')`;
+                slideElement.dataset.index = index;
+                
+                slideElement.innerHTML = `
+                    <div class="slide-content">
+                        <h3 class="text-white">${slide.title}</h3>
+                        <p class="text-white mb-0">${slide.description}</p>
+                    </div>
+                `;
+                
+                previewContainer.appendChild(slideElement);
+            });
+            
+            // Create navigation dots
+            const navDots = document.createElement('div');
+            navDots.className = 'preview-nav';
+            
+            service.slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `preview-dot ${index === 0 ? 'active' : ''}`;
+                dot.dataset.index = index;
+                dot.onclick = () => goToSlide(index);
+                navDots.appendChild(dot);
+            });
+            
+            previewContainer.appendChild(navDots);
+            previewsContainer.appendChild(previewContainer);
+        }
+
+        function nextSlide() {
+            const service = services[currentService];
+            currentSlideIndex = (currentSlideIndex + 1) % service.slides.length;
+            showSlide(currentSlideIndex);
+        }
+
+        function prevSlide() {
+            const service = services[currentService];
+            currentSlideIndex = (currentSlideIndex - 1 + service.slides.length) % service.slides.length;
+            showSlide(currentSlideIndex);
+        }
+
+        function goToSlide(index) {
+            currentSlideIndex = index;
+            showSlide(currentSlideIndex);
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.preview-slide');
+            const dots = document.querySelectorAll('.preview-dot');
+            
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+            
+            if (slides[index]) slides[index].classList.add('active');
+            if (dots[index]) dots[index].classList.add('active');
+            
+            // Reset auto-rotation timer
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        // Initialize with first service
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize WOW.js
+            new WOW().init();
+            
+            // Initialize with first service if needed
+            // selectService('corporate-gifts');
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (currentService) {
+                if (e.key === 'ArrowRight') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
